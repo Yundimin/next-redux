@@ -1,45 +1,15 @@
-"use client";
+import { cookies } from "next/headers";
+import HomeClient from "./homeClient";
 
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store";
-import { logout } from "@/store/slices/authSlice";
-import { useRouter } from "next/navigation";
+export default async function HomePage() {
+  const cookieStore = await cookies();
 
-export default function HomePage() {
-  const user = useSelector((state: RootState) => state.auth.user);
-  const dispatch = useDispatch();
-  const router = useRouter();
+  const token = cookieStore.get("token")?.value;
 
-  const handleLogout = async () => {
-    await fetch("/api/logout");
-    dispatch(logout());
-    router.push("/");
-  };
+  // 토큰이 있다면 임의 유저 정보 설정 (실제 프로젝트에선 API 호출 필요)
+  const user = token
+    ? { id: "1", name: "테스트유저", email: "test@test.com" }
+    : null;
 
-  return (
-    <main className="p-10">
-      <h1 className="text-2xl font-bold">홈페이지</h1>
-      {user ? (
-        <>
-          <p className="mt-4">환영합니다, {user.name}님!</p>
-          <button
-            onClick={handleLogout}
-            className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-          >
-            로그아웃
-          </button>
-        </>
-      ) : (
-        <div className="mt-4 text-red-500">
-          <p>로그인하지 않았습니다.</p>
-          <button
-            onClick={() => router.push("/login")}
-            className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            로그인하러 가기
-          </button>
-        </div>
-      )}
-    </main>
-  );
+  return <HomeClient user={user} token={token!} />;
 }
